@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chapter 05: Coordination – Distributed Systems</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/moon.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css"/>
+<style>
+:root {
+--accent: #61dafb;
+--accent2: #f7b731;
+--accent3: #26de81;
+--accent4: #fd9644;
+--danger: #fc5c65;
+}
+.reveal { font-size: 1.3em; }
+.reveal h1 { color: var(--accent); font-size: 1.8em; }
+.reveal h2 { color: var(--accent); font-size: 1.45em; border-bottom: 2px solid var(--accent); padding-bottom: .2em; }
+.reveal h3 { color: var(--accent2); font-size: 1.25em; }
+.reveal h4 { color: var(--accent3); font-size: 1.1em; margin-bottom: .3em; }
+.reveal pre { font-size: .72em; border-radius: 8px; }
+.reveal code { background: #1e2030; border-radius: 4px; padding: 2px 6px; }
+.reveal .slides section { text-align: left; }
+.reveal .slides section.center-all { text-align: center; }
+/* Two column layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; }
+/* Cards */
+.card {
+background: rgba(255,255,255,.07);
+border: 1px solid rgba(255,255,255,.12);
+border-radius: 10px;
+padding: .8em 1em;
+}
+.card.blue { border-color: var(--accent); background: rgba(97,218,251,.08); }
+.card.yellow { border-color: var(--accent2); background: rgba(247,183,49,.08); }
+.card.green { border-color: var(--accent3); background: rgba(38,222,129,.08); }
+.card.orange { border-color: var(--accent4); background: rgba(253,150,68,.08); }
+.card.red { border-color: var(--danger); background: rgba(252,92,101,.08); }
+/* Label badges */
+.badge {
+display: inline-block;
+padding: 2px 10px;
+border-radius: 12px;
+font-size: .65em;
+font-weight: bold;
+vertical-align: middle;
+margin-right: .5em;
+}
+.badge.blue { background: var(--accent); color: #000; }
+.badge.yellow { background: var(--accent2); color: #000; }
+.badge.green { background: var(--accent3); color: #000; }
+.badge.red { background: var(--danger); color: #fff; }
+/* Timeline */
+.timeline { list-style: none; padding: 0; margin: 0; border-left: 3px solid var(--accent); padding-left: 1.2em; }
+.timeline li { position: relative; margin-bottom: .6em; }
+.timeline li::before {
+content: '';
+position: absolute;
+left: -1.45em;
+top: .35em;
+width: 10px; height: 10px;
+border-radius: 50%;
+background: var(--accent2);
+}
+/* Equation box */
+.eq-box {
+background: rgba(97,218,251,.1);
+border-left: 4px solid var(--accent);
+border-radius: 6px;
+padding: .5em 1em;
+margin: .5em 0;
+font-family: 'Courier New', monospace;
+font-size: .95em;
+}
+/* Highlight */
+.hl { color: var(--accent2); font-weight: bold; }
+.hl-green { color: var(--accent3); font-weight: bold; }
+.hl-red { color: var(--danger); font-weight: bold; }
+/* Step list */
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; position: relative; padding-left: 2.2em; margin-bottom: .5em; }
+.steps li::before {
+content: counter(step);
+position: absolute; left: 0; top: 0;
+background: var(--accent);
+color: #000;
+width: 1.5em; height: 1.5em;
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-weight: bold; font-size: .9em;
+}
+/* Comparison table */
+.reveal table { font-size: .9em; }
+.reveal table th { background: rgba(97,218,251,.2); color: var(--accent); }
+.reveal table td { border-color: rgba(255,255,255,.15); }
+/* Diagram boxes */
+.node-box {
+display: inline-block;
+padding: .3em .8em;
+border: 2px solid var(--accent);
+border-radius: 8px;
+background: rgba(97,218,251,.1);
+margin: .2em;
+font-family: monospace;
+}
+.arrow { color: var(--accent2); font-size: 1.2em; }
+/* Handson block */
+.handson {
+background: rgba(38,222,129,.08);
+border: 2px solid var(--accent3);
+border-radius: 10px;
+padding: 1em 1.2em;
+}
+.handson h4 { color: var(--accent3); }
+/* Note box */
+.note {
+background: rgba(253,150,68,.08);
+border-left: 4px solid var(--accent4);
+border-radius: 4px;
+padding: .5em 1em;
+font-size: .9em;
+margin-top: .5em;
+}
+/* Fragment helpers */
+.fragment.current-visible.visible { display: block; }
+/* Small font */
+.small { font-size: .88em; }
+.tiny { font-size: .78em; }
+/* Section divider */
+.section-divider h2 { font-size: 1.8em; text-align: center; border: none; }
+.section-divider p { text-align: center; color: rgba(255,255,255,.6); }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- 
+COVER
+-->
+<section class="center-all" data-background-gradient="radial-gradient(ellipse at 20% 50%, #0d2137 0%, #0a0f1e 100%)">
+<br>
+<h1> Koordinasi</h1>
+<h2 style="border:none; color:#b0c8e0; font-size:1em;">Distributed Systems – Chapter 05</h2>
+<p style="color:rgba(255,255,255,.5); font-size:.85em;">Sinkronisasi Jam · Logical Clocks · Mutual Exclusion · Pemilihan Leader</p>
+<hr style="border-color:var(--accent); margin: 1em auto; width:40%;"/>
+<p class="small" style="color:rgba(255,255,255,.4);">
+Materi: ZooKeeper · Raft · Hands-on Lab
+</p>
+</section>
+
+<!-- 
+AGENDA
+-->
+<section>
+<h2> Agenda</h2>
+<div class="three-col" style="margin-top:.8em;">
+<div class="card blue">
+<h4>Bagian 1</h4>
+<ul class="small">
+<li>Physical Clocks & UTC</li>
+<li>Clock Drift</li>
+<li>NTP & RBS</li>
+</ul>
+</div>
+<div class="card yellow">
+<h4>Bagian 2</h4>
+<ul class="small">
+<li>Happened-Before</li>
+<li>Lamport Clocks</li>
+<li>Vector Clocks</li>
+</ul>
+</div>
+<div class="card green">
+<h4>Bagian 3</h4>
+<ul class="small">
+<li>Mutual Exclusion</li>
+<li>Election Algorithms</li>
+<li>Gossip</li>
+</ul>
+</div>
+</div>
+<div class="two-col" style="margin-top:.8em;">
+<div class="card orange">
+<h4>Case Study</h4>
+<ul class="small">
+<li> ZooKeeper</li>
+<li> Raft</li>
+</ul>
+</div>
+<div class="card" style="border-color:var(--accent3);">
+<h4> Hands-on Lab</h4>
+<ul class="small">
+<li>Simulasi Lamport Clock (Python)</li>
+<li>Etcd/ZooKeeper CLI</li>
+<li>Raft visualizer</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- 
+BAGIAN 1: CLOCK SYNCHRONIZATION
+-->
+<section class="section-divider" data-background-color="#07192b">
+<h2> Bagian 1</h2>
+<h2>Sinkronisasi Jam</h2>
+<p>Physical Clocks · UTC · NTP · RBS</p>
+</section>
+
+<!-- Why Clock Sync? -->
+<section>
+<h2>Mengapa Sinkronisasi Jam Penting?</h2>
+<div class="two-col">
+<div>
+<h4>Masalah</h4>
+<ul>
+<li>Setiap node punya jam sendiri</li>
+<li>Jam bisa <span class="hl">drift</span> (cepat/lambat)</li>
+<li>Tanpa sinkronisasi → inkonsistensi urutan event</li>
+</ul>
+<div class="note">
+Terkadang kita butuh <em>exact time</em>, bukan hanya urutan.
+</div>
+</div>
+<div>
+<h4>Contoh Nyata</h4>
+<div class="card blue small">
+<strong>Scenario:</strong><br>
+P1 update file jam 10:00:01<br>
+P2 backup file jam 09:59:59 (drift)<br>
+→ Backup memakai versi <span class="hl-red">lama</span>!
+</div>
+<div class="card green small" style="margin-top:.5em;">
+<strong>Solusi:</strong> UTC + NTP / GPS
+</div>
+</div>
+</div>
+</section>
+
+<!-- UTC -->
+<section>
+<h2>Universal Coordinated Time (UTC)</h2>
+<div class="two-col">
+<div>
+<ul>
+<li>Berbasis transisi atom <span class="hl">Cesium-133</span></li>
+<li>Rata-rata ~50 jam cesium di seluruh dunia</li>
+<li>Terkadang menambah <em>leap second</em></li>
+<li>Disiarkan via radio gelombang pendek &amp; satelit</li>
+</ul>
+<div class="eq-box">
+Akurasi GPS: <strong>±0.5 ms</strong>
+</div>
+</div>
+<div>
+<h4>Dua Tujuan Sinkronisasi</h4>
+<div class="card yellow">
+<strong>Presisi (Internal Sync)</strong><br>
+<code>|C_p(t) − C_q(t)| ≤ π</code><br>
+<small>Selisih antar jam ≤ π</small>
+</div>
+<div class="card blue" style="margin-top:.5em;">
+<strong>Akurasi (External Sync)</strong><br>
+<code>|C_p(t) − t| ≤ α</code><br>
+<small>Jam harus dekat dengan UTC nyata</small>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Clock Drift -->
+<section>
+<h2>Clock Drift</h2>
+<div class="two-col">
+<div>
+<h4>Spesifikasi</h4>
+<ul>
+<li>Setiap jam punya <span class="hl">maximum drift rate ρ</span></li>
+<li><code>F(t)</code>: frekuensi osilator hardware</li>
+<li><code>F</code>: frekuensi ideal konstan</li>
+</ul>
+<div class="eq-box">
+(1−ρ) ≤ F(t)/F ≤ (1+ρ)
+</div>
+<div class="eq-box">
+1−ρ ≤ dC_p(t)/dt ≤ 1+ρ
+</div>
+</div>
+<div>
+<h4>Tiga Tipe Jam</h4>
+<div class="card red small"> <strong>Fast clock:</strong> dC/dt &gt; 1</div>
+<div class="card green small" style="margin:.4em 0;"> <strong>Perfect clock:</strong> dC/dt = 1</div>
+<div class="card yellow small"> <strong>Slow clock:</strong> dC/dt &lt; 1</div>
+<div class="note">Semakin lama ρ berakumulasi → jam makin melenceng!</div>
+</div>
+</div>
+</section>
+
+<!-- NTP -->
+<section>
+<h2>Network Time Protocol (NTP)</h2>
+<div class="two-col">
+<div>
+<h4>Mengukur Offset &amp; Delay</h4>
+<pre style="margin:0;"><code class="text">
+S T₂T₃→
+↑ ↓
+C T₁ T₄→
+δT_req δT_res
+</code></pre>
+<div class="eq-box">
+θ = ((T₂−T₁) + (T₃−T₄)) / 2<br>
+δ = ((T₄−T₁) − (T₃−T₂)) / 2
+</div>
+</div>
+<div>
+<h4>Asumsi</h4>
+<p class="small">δT_req ≈ δT_res (delay simetris)</p>
+<h4>Strategi NTP</h4>
+<ul class="small">
+<li>Kumpulkan beberapa pasang (θ, δ)</li>
+<li>Pilih θ dengan δ <span class="hl">terkecil</span></li>
+<li>Sinkronisasi secara hierarkis (stratum 1 → 2 → …)</li>
+</ul>
+<div class="note">NTP mencapai akurasi ~1–50ms di internet publik.</div>
+</div>
+</div>
+</section>
+
+<!-- RBS -->
+<section>
+<h2>Reference Broadcast Synchronization (RBS)</h2>
+<div class="two-col">
+<div>
+<ul>
+<li>Node broadcast pesan referensi <em>m</em></li>
+<li>Setiap penerima <em>p</em> catat waktu <code>T_{p,m}</code> dari jam lokal</li>
+<li>Rata-rata biasa <span class="hl-red">tidak menangkap drift</span></li>
+</ul>
+<div class="eq-box">
+Offset[p,q] = Σ(T_{p,k} − T_{q,k}) / M<br>
+Offset[p,q](t) = αt + β (regresi linear)
+</div>
+</div>
+<div>
+<h4>Keunggulan RBS</h4>
+<ul class="small">
+<li>Menghilangkan waktu persiapan pesan dari <em>critical path</em></li>
+<li>Sinkronisasi <em>internal</em> – tidak butuh referensi eksternal</li>
+<li>Cocok untuk sensor wireless</li>
+</ul>
+<div class="card green small" style="margin-top:.5em;">
+RBS lebih akurat dari NTP pada jaringan lokal!
+</div>
+</div>
+</div>
+</section>
+
+<!-- 
+BAGIAN 2: LOGICAL CLOCKS
+-->
+<section class="section-divider" data-background-color="#071a14">
+<h2> Bagian 2</h2>
+<h2>Logical Clocks</h2>
+<p>Happened-Before · Lamport · Vector Clocks</p>
+</section>
+
+<!-- Happened Before -->
+<section>
+<h2>Relasi Happened-Before (→)</h2>
+<div class="two-col">
+<div>
+<h4>Definisi</h4>
+<ul>
+<li>Jika <em>a</em> dan <em>b</em> di proses yang sama dan <em>a</em> lebih dulu: <span class="hl">a → b</span></li>
+<li>Jika <em>a</em> = kirim pesan dan <em>b</em> = terima pesan: <span class="hl">a → b</span></li>
+<li>Transitif: a → b dan b → c <span class="hl">a → c</span></li>
+</ul>
+<div class="note">Ini adalah <em>partial ordering</em> – tidak semua event bisa dibandingkan (concurrent).</div>
+</div>
+<div>
+<h4>Mengapa Urutan &gt; Waktu?</h4>
+<div class="card yellow small">
+Yang penting bukan <em>kapan tepatnya</em>, tapi <em>urutan</em> event terjadi.
+</div>
+<div class="card blue small" style="margin-top:.5em;">
+<strong>Contoh:</strong><br>
+Dua replika database harus memproses update dalam urutan yang <em>sama</em>.
+</div>
+</div>
+</div>
+</section>
+
+<!-- Lamport Clock Algorithm -->
+<section>
+<h2>Lamport Logical Clocks</h2>
+<div class="two-col">
+<div>
+<h4>Aturan Counter C_i</h4>
+<ol class="steps">
+<li>Event lokal baru → <code>C_i++</code></li>
+<li>Kirim pesan m → beri timestamp <code>ts(m) = C_i</code></li>
+<li>Terima pesan m → <code>C_j = max(C_j, ts(m)) + 1</code></li>
+</ol>
+<div class="eq-box" style="margin-top:.6em;">
+P1: a → b C(a) &lt; C(b)<br>
+P2: send → recv C(send) &lt; C(recv)
+</div>
+</div>
+<div>
+<h4>Contoh 3 Proses</h4>
+<pre><code class="text" style="font-size:.6em;">P₁: 06121824303642485460
+m₁ m₄
+P₂: 0816→162432404856647280
+m₂ m₃
+P₃: 0102030405060708090100
+</code></pre>
+<div class="note small">
+Setelah terima m₁, P₂ adjust jam ke 16 (bukan 8). Setelah terima m₄, P₁ adjust ke 70.
+</div>
+</div>
+</div>
+</section>
+
+<!-- Lamport Python code -->
+<section>
+<h2>Lamport Clock – Python Implementation</h2>
+<pre><code class="python" data-trim>
+class LamportClock:
+def __init__(self, process_id):
+self.pid = process_id
+self.time = 0
+
+def tick(self):
+"""Local event."""
+self.time += 1
+return self.time
+
+def send(self):
+"""Called before sending a message."""
+self.time += 1
+return self.time # attach as timestamp
+
+def receive(self, msg_time):
+"""Called upon receiving a message with timestamp."""
+self.time = max(self.time, msg_time) + 1
+return self.time
+
+# Usage
+p1 = LamportClock("P1")
+p2 = LamportClock("P2")
+
+t_send = p1.send() # P1 sends message
+t_recv = p2.receive(t_send) # P2 receives it
+print(f"P1 sent at {t_send}, P2 received at {t_recv}")
+</code></pre>
+</section>
+
+<!-- Totally Ordered Multicast -->
+<section>
+<h2>Totally Ordered Multicast</h2>
+<div class="two-col">
+<div>
+<h4>Masalah</h4>
+<div class="card red small">
+P1 tambah $100, P2 naikkan 1%<br>
+Account awal $1000, ada 2 replika<br><br>
+Tanpa sinkronisasi:<br>
+Replika #1 → <strong>$1111</strong><br>
+Replika #2 → <strong>$1110</strong> 
+</div>
+</div>
+<div>
+<h4>Solusi</h4>
+<ul class="small">
+<li>P_i kirim pesan berisi timestamp ke semua proses</li>
+<li>Pesan dimasukkan ke queue, diurutkan by timestamp</li>
+<li>P_j delivery ke aplikasi jika:
+<ol>
+<li>m_i ada di head queue</li>
+<li>Semua proses P_k punya pesan dengan timestamp lebih besar</li>
+</ol>
+</li>
+</ul>
+<div class="note">Asumsi: komunikasi reliable &amp; FIFO ordered.</div>
+</div>
+</div>
+</section>
+
+<!-- Vector Clocks -->
+<section>
+<h2>Vector Clocks</h2>
+<div class="two-col">
+<div>
+<h4>Masalah Lamport Clock</h4>
+<div class="card red small">
+C(a) &lt; C(b) <strong>tidak</strong> jamin a causally precede b!
+</div>
+<div style="margin-top:.6em;">
+<h4>Solusi: Vector VC_i</h4>
+<ul class="small">
+<li><code>VC_i[i]</code> = logical clock lokal P_i</li>
+<li><code>VC_i[j] = k</code> → P_i tahu k event terjadi di P_j</li>
+</ul>
+</div>
+</div>
+<div>
+<h4>Aturan Update</h4>
+<ol class="steps small">
+<li>Event di P_i → <code>VC_i[i]++</code></li>
+<li>Kirim m → timestamp <code>ts(m) = VC_i</code></li>
+<li>Terima m → <code>VC_j[k] = max(VC_j[k], ts(m)[k])</code> untuk setiap k, lalu step 1</li>
+</ol>
+<div class="eq-box small">
+ts(a) &lt; ts(b) iff<br>
+∀k: ts(a)[k] ≤ ts(b)[k] AND<br>
+∃k': ts(a)[k'] &lt; ts(b)[k']
+</div>
+</div>
+</div>
+</section>
+
+<!-- Causally Ordered Multicast -->
+<section>
+<h2>Causally Ordered Multicast</h2>
+<div class="two-col">
+<div>
+<h4>Konsep</h4>
+<ul>
+<li>Pesan didelay sampai semua pesan yang <em>causally precede</em>-nya sudah diterima</li>
+<li>P_i increment <code>VC_i[i]</code> hanya saat <em>kirim</em></li>
+</ul>
+<div class="eq-box small">
+Deliver m dari P_i jika:<br>
+1. ts(m)[i] = VC_j[i] + 1<br>
+2. ts(m)[k] ≤ VC_j[k] untuk k≠i
+</div>
+</div>
+<div>
+<h4>Contoh Postpone Delivery</h4>
+<pre><code class="text" style="font-size:.62em;">
+P₁ (1,0,0)(1,1,0)→
+m m*
+P₂ (1,0,0)→
+m*(1,1,0)
+P₃ →
+(0,0,0) (1,0,0) (1,1,0)
+Postpone Deliver m Deliver m*
+</code></pre>
+<div class="note">m* harus menunggu m terlebih dahulu!</div>
+</div>
+</div>
+</section>
+
+<!-- 
+BAGIAN 3: MUTUAL EXCLUSION & ELECTION
+-->
+<section class="section-divider" data-background-color="#1a0718">
+<h2> Bagian 3</h2>
+<h2>Mutual Exclusion &amp; Election</h2>
+<p>Centralized · Distributed · Token Ring · Bully · Ring</p>
+</section>
+
+<!-- Mutual Exclusion Overview -->
+<section>
+<h2>Mutual Exclusion</h2>
+<div class="two-col">
+<div>
+<h4>Masalah</h4>
+<p class="small">Beberapa proses butuh akses eksklusif ke satu sumber daya → <span class="hl">hanya satu yang boleh masuk critical region</span>.</p>
+<h4>Dua Pendekatan</h4>
+<div class="card blue small">
+<strong>Permission-based:</strong> Proses minta izin ke proses lain.
+</div>
+<div class="card yellow small" style="margin-top:.5em;">
+<strong>Token-based:</strong> Token beredar; yang pegang token boleh masuk.
+</div>
+</div>
+<div>
+<h4>Perbandingan Algoritma</h4>
+<table class="tiny">
+<thead>
+<tr><th>Algoritma</th><th>Pesan/entry</th><th>Delay</th></tr>
+</thead>
+<tbody>
+<tr><td>Centralized</td><td>3</td><td>2</td></tr>
+<tr><td>Distributed (Ricart)</td><td>2(N-1)</td><td>2(N-1)</td></tr>
+<tr><td>Token Ring</td><td>1…∞</td><td>0…N-1</td></tr>
+<tr><td>Decentralized</td><td>2kN+…</td><td>2kN+…</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- Centralized -->
+<section>
+<h2>Centralized Mutual Exclusion</h2>
+<div class="two-col">
+<div>
+<ul class="steps small">
+<li>P1 minta izin ke koordinator</li>
+<li>Koordinator grant → P1 masuk CR</li>
+<li>P2 minta izin → koordinator tidak reply (queue)</li>
+<li>P1 release → koordinator beri izin ke P2</li>
+</ul>
+<div class="eq-box" style="margin-top:.5em;">
+Pesan total: 3 (request + grant + release)
+</div>
+</div>
+<div>
+<h4>Trade-offs</h4>
+<div class="card green small"> Sederhana, hanya 3 pesan</div>
+<div class="card red small" style="margin:.4em 0;"> Single point of failure</div>
+<div class="card red small"> Koordinator bottleneck</div>
+<div class="note small">Cocok untuk sistem kecil dengan availability tinggi.</div>
+</div>
+</div>
+</section>
+
+<!-- Ricart & Agrawala -->
+<section>
+<h2>Ricart &amp; Agrawala (Distributed)</h2>
+<div class="two-col">
+<div>
+<h4>Prinsip</h4>
+<p class="small">Reply diberikan <em>hanya jika</em>:</p>
+<ul class="small">
+<li>Proses tidak tertarik ke resource</li>
+<li>Proses juga menunggu, tapi timestamp <span class="hl">lebih besar</span> (prioritas lebih rendah)</li>
+</ul>
+<p class="small">Selain itu, reply <span class="hl-red">ditunda</span>.</p>
+</div>
+<div>
+<h4>Contoh 3 Proses</h4>
+<pre><code class="text" style="font-size:.65em;">(a) P0(ts=8) dan P2(ts=12) sama2 minta
+(b) P0 menang (ts lebih kecil)
+P0 → OK dari P1, P2
+P2 → OK dari P1
+(c) P0 selesai, kirim OK ke P2
+P2 masuk CR
+</code></pre>
+<div class="card yellow small">
+Butuh 2(N-1) pesan per entry/exit
+</div>
+</div>
+</div>
+</section>
+
+<!-- Token Ring -->
+<section>
+<h2>Token Ring Algorithm</h2>
+<div class="two-col">
+<div>
+<h4>Prinsip</h4>
+<ul>
+<li>Proses diorganisir dalam <span class="hl">logical ring</span></li>
+<li>Token beredar di ring</li>
+<li>Proses yang pegang token boleh masuk CR</li>
+<li>Jika tidak mau masuk, langsung forward token</li>
+</ul>
+</div>
+<div>
+<div class="card blue small">
+<pre style="background:transparent; box-shadow:none; margin:0; padding:0;"><code class="text" style="font-size:.75em;">
+[0]→[1]→[2]→[3]
+↑ ↓
+[7]←[6]←[5]←[4]
+Token
+</code></pre>
+</div>
+<div class="card green small" style="margin-top:.5em;"> Tidak ada starvation</div>
+<div class="card red small" style="margin-top:.4em;"> Token hilang → perlu regenerasi</div>
+</div>
+</div>
+</section>
+
+<!-- Election Algorithms -->
+<section>
+<h2>Election Algorithms</h2>
+<div class="two-col">
+<div>
+<h4>Prinsip</h4>
+<p class="small">Algoritma butuh proses yang bertindak sebagai <em>coordinator</em>. Proses tersebut dipilih secara <span class="hl">dinamis</span>.</p>
+<h4>Asumsi Dasar</h4>
+<ul class="small">
+<li>Semua proses punya ID unik</li>
+<li>Semua proses tahu ID proses lain</li>
+<li>Pilih proses dengan <span class="hl">ID tertinggi yang hidup</span></li>
+</ul>
+</div>
+<div>
+<h4>Algoritma Tersedia</h4>
+<div class="card yellow small"> <strong>Bully Algorithm:</strong> Proses dengan ID lebih tinggi "menindas" yang lebih rendah</div>
+<div class="card blue small" style="margin:.4em 0;"> <strong>Ring Algorithm:</strong> Pesan beredar di ring, cari ID tertinggi</div>
+<div class="card green small"> <strong>Raft Election:</strong> Follower vote untuk kandidat</div>
+</div>
+</div>
+</section>
+
+<!-- Bully Algorithm -->
+<section>
+<h2>The Bully Algorithm</h2>
+<div class="two-col">
+<div>
+<ol class="steps small">
+<li>P_k kirim ELECTION ke semua proses dengan ID lebih tinggi</li>
+<li>Tidak ada yang reply → P_k menang, jadi koordinator</li>
+<li>Ada yang reply → proses tersebut mengambil alih; P_k selesai</li>
+<li>Koordinator baru broadcast COORDINATOR ke semua</li>
+</ol>
+</div>
+<div>
+<pre><code class="text" style="font-size:.65em;">
+[Tahap 1] P4 mulai election (P7 crashed):
+P4 → ELECTION → P5, P6
+P4 → ELECTION → P6 (P5 juga crash)
+
+[Tahap 2] P5,P6 reply OK ke P4
+P6 → OK ke P4
+P6 mulai election sendiri
+
+[Tahap 3] P6 jadi koordinator:
+P6 → COORDINATOR ke semua
+</code></pre>
+<div class="note small">Proses terbesar yang hidup selalu menang!</div>
+</div>
+</div>
+</section>
+
+<!-- 
+CASE STUDY: ZOOKEEPER
+-->
+<section class="section-divider" data-background-color="#071a0d">
+<h2> Case Study</h2>
+<h2>Apache ZooKeeper</h2>
+<p>Koordinasi terdistribusi untuk sistem skala besar</p>
+</section>
+
+<!-- ZooKeeper Overview -->
+<section>
+<h2>ZooKeeper – Overview</h2>
+<div class="two-col">
+<div>
+<h4>Apa itu ZooKeeper?</h4>
+<ul class="small">
+<li>Layanan koordinasi terdistribusi open-source (Apache)</li>
+<li>Dipakai oleh Hadoop, Kafka, HBase, dll.</li>
+<li>Menyediakan: <em>naming, config, sync, group services</em></li>
+<li>Semua komunikasi client-server <span class="hl">nonblocking</span></li>
+</ul>
+</div>
+<div>
+<h4>Data Model: ZNode Tree</h4>
+<pre><code class="text" style="font-size:.7em;">
+/
+/app1
+/config
+/workers
+worker-1
+worker-2
+/app2
+/lock
+</code></pre>
+<div class="note small">Mirip filesystem – hierarkis, bisa di-watch.</div>
+</div>
+</div>
+</section>
+
+<!-- ZooKeeper Architecture -->
+<section>
+<h2>ZooKeeper – Arsitektur</h2>
+<div class="two-col">
+<div>
+<h4>Komponen</h4>
+<ul class="small">
+<li><span class="hl">Leader:</span> proses semua write requests</li>
+<li><span class="hl">Followers:</span> replika, layani read</li>
+<li>Semua write → leader → broadcast ke followers</li>
+<li>Read bisa dari follower → <em>eventual consistency</em></li>
+</ul>
+<div class="note small">
+ZooKeeper menjamin <strong>sequential consistency</strong> untuk writes.
+</div>
+</div>
+<div>
+<pre><code class="text" style="font-size:.65em;">
+Client Leader Followers
+
+read()→ 
+←data 
+
+write()→ 
+broadcast()→
+←ack()
+←success 
+
+</code></pre>
+<div class="card yellow small" style="margin-top:.4em;">
+Quorum: mayoritas follower harus ack sebelum write commit
+</div>
+</div>
+</div>
+</section>
+
+<!-- ZooKeeper Primitives -->
+<section>
+<h2>ZooKeeper – Primitif Koordinasi</h2>
+<div class="three-col">
+<div class="card blue">
+<h4>Naming</h4>
+<ul class="small">
+<li>ZNode = named entity</li>
+<li>create/delete/exists/getData</li>
+</ul>
+</div>
+<div class="card yellow">
+<h4>Config Management</h4>
+<ul class="small">
+<li>Simpan config di ZNode</li>
+<li>Semua client watch perubahan</li>
+</ul>
+</div>
+<div class="card green">
+<h4>Group Membership</h4>
+<ul class="small">
+<li>Ephemeral ZNode</li>
+<li>Node crash → ZNode hilang otomatis</li>
+</ul>
+</div>
+</div>
+<div class="two-col" style="margin-top:.7em;">
+<div class="card orange">
+<h4>Watches (Notification)</h4>
+<p class="small">Client bisa <em>watch</em> sebuah ZNode dan mendapat notifikasi saat berubah.</p>
+</div>
+<div class="card" style="border-color:var(--accent3);">
+<h4>Versioning</h4>
+<p class="small"><code>W(n,k)a</code> – write ke node n hanya jika versi saat ini = k. Cegah race condition!</p>
+</div>
+</div>
+</section>
+
+<!-- ZooKeeper Locking -->
+<section>
+<h2>ZooKeeper – Distributed Locking</h2>
+<div class="two-col">
+<div>
+<h4>Race Condition!</h4>
+<ol class="steps small">
+<li>C1 create <code>/lock</code> → dapat lock</li>
+<li>C2 cek <code>/lock</code> → sudah ada</li>
+<li>C1 delete <code>/lock</code> (release)</li>
+<li>C2 subscribe watch (terlambat!) → C2 stuck!</li>
+</ol>
+<div class="note small">Solusi: gunakan <strong>version number</strong>!</div>
+</div>
+<div>
+<h4>Protokol Locking Benar</h4>
+<ol class="steps small">
+<li><strong>Lock:</strong> C1 create <code>/lock</code></li>
+<li><strong>Lock:</strong> C2 cek → sudah ada, langsung subscribe watch ke <code>/lock</code></li>
+<li><strong>Unlock:</strong> C1 delete <code>/lock</code> → semua subscriber dinotifikasi</li>
+<li>C2 menerima notifikasi → coba create <code>/lock</code></li>
+</ol>
+</div>
+</div>
+</section>
+
+<!-- ZooKeeper Code Example -->
+<section>
+<h2>ZooKeeper – Contoh Kode (Python)</h2>
+<pre><code class="python" data-trim>
+from kazoo.client import KazooClient
+from kazoo.exceptions import NodeExistsError
+import time
+
+zk = KazooClient(hosts='127.0.0.1:2181')
+zk.start()
+
+def acquire_lock(lock_path="/lock", node_id="worker-1"):
+"""Coba acquire distributed lock."""
+try:
+zk.create(lock_path, node_id.encode(), ephemeral=True)
+print(f"[{node_id}] Lock acquired!")
+return True
+except NodeExistsError:
+print(f"[{node_id}] Lock busy, watching...")
+@zk.DataWatch(lock_path)
+def watch_lock(data, stat, event):
+if event and event.type == "DELETED":
+acquire_lock(lock_path, node_id)
+return False
+
+def release_lock(lock_path="/lock"):
+"""Lepas lock."""
+zk.delete(lock_path)
+print("Lock released!")
+
+# Demo
+acquire_lock()
+time.sleep(2)
+release_lock()
+zk.stop()
+</code></pre>
+</section>
+
+<!-- ZooKeeper Leader Election -->
+<section>
+<h2>ZooKeeper – Leader Election</h2>
+<div class="two-col">
+<div>
+<h4>Algoritma</h4>
+<ol class="steps small">
+<li>Setiap server create <em>ephemeral sequential</em> ZNode di <code>/election/</code></li>
+<li>Node dengan sequence number <span class="hl">terkecil</span> = Leader</li>
+<li>Follower watch ZNode <em>sebelumnya</em> (bukan semua!)</li>
+<li>Jika node sebelumnya hilang → cek ulang apakah jadi leader</li>
+</ol>
+<div class="note small">Ini menghindari "herd effect" – hanya 1 node yang bangun saat leader down!</div>
+</div>
+<div>
+<pre><code class="python" data-trim style="font-size:.6em;">
+zk.ensure_path("/election")
+path = zk.create(
+"/election/node",
+ephemeral=True,
+sequence=True
+)
+seq_num = int(path.split("-")[-1])
+
+# Ambil semua kandidat
+children = sorted(zk.get_children("/election"))
+my_seq = children.index(
+path.split("/")[-1]
+)
+
+if my_seq == 0:
+print("I am the LEADER!")
+else:
+# Watch node sebelumku
+prev = "/election/" + children[my_seq - 1]
+@zk.DataWatch(prev)
+def watch_prev(data, stat, event):
+if not stat:
+check_leader()
+</code></pre>
+</div>
+</div>
+</section>
+
+<!-- 
+CASE STUDY: RAFT
+-->
+<section class="section-divider" data-background-color="#1a1007">
+<h2> Case Study</h2>
+<h2>Raft Consensus Algorithm</h2>
+<p>Understandable distributed consensus</p>
+</section>
+
+<!-- Raft Overview -->
+<section>
+<h2>Raft – Mengapa Ada?</h2>
+<div class="two-col">
+<div>
+<h4>Masalah Paxos</h4>
+<ul class="small">
+<li>Paxos sulit dipahami dan diimplementasi</li>
+<li>Banyak detail yang tidak dijelaskan</li>
+<li>Multi-Paxos butuh banyak "engineering"</li>
+</ul>
+<div class="card red small" style="margin-top:.5em;">
+"Paxos is exceptionally difficult to understand" – Ongaro 2014
+</div>
+</div>
+<div>
+<h4>Desain Raft</h4>
+<div class="card green small">
+<strong>Understandability</strong> sebagai tujuan utama
+</div>
+<div class="card blue small" style="margin:.4em 0;">
+Memecah masalah menjadi:
+<ol style="margin:.3em 0;">
+<li>Leader Election</li>
+<li>Log Replication</li>
+<li>Safety</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Raft States & Terms -->
+<section>
+<h2>Raft – State &amp; Terms</h2>
+<div class="two-col">
+<div>
+<h4>State Server</h4>
+<div class="card yellow small"> <strong>Leader:</strong> proses semua request, kirim heartbeat</div>
+<div class="card blue small" style="margin:.4em 0;"> <strong>Candidate:</strong> sedang mencalonkan diri</div>
+<div class="card" style="border-color: rgba(255,255,255,.3); margin-bottom:.4em;" class="small"> <strong>Follower:</strong> pasif, hanya response</div>
+<div class="eq-box small">
+Transisi: Follower → Candidate → Leader
+</div>
+</div>
+<div>
+<h4>Terms (Istilah)</h4>
+<pre><code class="text" style="font-size:.65em;">
+Term 1 Term 2 Term 3
+election election election
+L=S1 L=S2 L=S3
+
+012→
+</code></pre>
+<ul class="small">
+<li>Setiap term dimulai dengan election</li>
+<li>Term = logical clock global</li>
+<li>Request dari term lama → ditolak</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- Raft Leader Election -->
+<section>
+<h2>Raft – Leader Election</h2>
+<div class="two-col">
+<div>
+<ol class="steps small">
+<li>Follower tidak terima heartbeat → <em>election timeout</em></li>
+<li>Follower jadi <strong>Candidate</strong>, increment term, vote untuk diri sendiri</li>
+<li>Broadcast <code>RequestVote</code> ke semua</li>
+<li>Jika dapat <span class="hl">majority votes</span> → jadi Leader</li>
+<li>Leader kirim <code>AppendEntries</code> (heartbeat) secara periodik</li>
+</ol>
+</div>
+<div>
+<h4>Aturan Voting</h4>
+<ul class="small">
+<li>Setiap server vote <em>maksimal 1 kali</em> per term</li>
+<li>Vote untuk kandidat dengan log yang <span class="hl">paling up-to-date</span></li>
+<li>Election timeout di-randomize → menghindari split vote</li>
+</ul>
+<div class="card green small" style="margin-top:.5em;">
+Dengan N server, butuh ⌊N/2⌋ + 1 votes untuk menang (majority).
+</div>
+</div>
+</div>
+</section>
+
+<!-- Raft Log Replication -->
+<section>
+<h2>Raft – Log Replication</h2>
+<div class="two-col">
+<div>
+<h4>Alur Normal</h4>
+<ol class="steps small">
+<li>Client kirim command ke Leader</li>
+<li>Leader append entry ke log (belum commit)</li>
+<li>Leader broadcast <code>AppendEntries</code> ke followers</li>
+<li>Setelah majority ACK → commit entry</li>
+<li>Leader apply ke state machine, reply ke client</li>
+<li>Followers apply di next roundtrip</li>
+</ol>
+</div>
+<div>
+<pre><code class="text" style="font-size:.6em;">
+Index: 1 2 3 4 5
+
+Leader: x=3 y=1 y=9 x=2 [...]
+↑commit
+
+Follower1: x=3 y=1 y=9 x=2
+Follower2: x=3 y=1 y=9 [pending]
+Follower3: x=3 y=1 [behind]
+</code></pre>
+<div class="note small">
+Raft menjamin: jika entry committed, semua server yang terpilih jadi leader di term berikutnya pasti punya entry tersebut.
+</div>
+</div>
+</div>
+</section>
+
+<!-- Raft vs Paxos vs ZooKeeper -->
+<section>
+<h2>Raft vs Paxos vs ZooKeeper (ZAB)</h2>
+<table class="small">
+<thead>
+<tr>
+<th>Aspek</th>
+<th>Raft</th>
+<th>Paxos</th>
+<th>ZooKeeper (ZAB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kemudahan pemahaman</td>
+<td class="hl-green">Tinggi</td>
+<td class="hl-red">Rendah</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Leader explicit</td>
+<td class="hl-green">Ya</td>
+<td>Tidak harus</td>
+<td class="hl-green">Ya</td>
+</tr>
+<tr>
+<td>Log replication</td>
+<td class="hl-green">Terstruktur</td>
+<td>Kompleks</td>
+<td class="hl-green">ZAB protocol</td>
+</tr>
+<tr>
+<td>Membership change</td>
+<td>Joint consensus</td>
+<td>Tidak standar</td>
+<td>Manual reconfig</td>
+</tr>
+<tr>
+<td>Implementasi populer</td>
+<td>etcd, Consul</td>
+<td>Chubby</td>
+<td>ZooKeeper</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<!-- Raft Python Demo -->
+<section>
+<h2>Raft – Simulasi Sederhana (Python)</h2>
+<pre><code class="python" data-trim>
+import random, time, threading
+
+class RaftNode:
+FOLLOWER, CANDIDATE, LEADER = "follower", "candidate", "leader"
+
+def __init__(self, node_id, peers):
+self.id, self.peers = node_id, peers
+self.state = self.FOLLOWER
+self.current_term = 0
+self.voted_for = None
+self.election_timeout = random.uniform(1.5, 3.0) # seconds
+
+def start_election(self):
+self.state = self.CANDIDATE
+self.current_term += 1
+self.voted_for = self.id
+votes = 1
+print(f"[{self.id}] Starting election for term {self.current_term}")
+
+for peer in self.peers:
+# Simulasi: peer vote untuk kita jika term kita lebih baru
+if peer.current_term < self.current_term:
+peer.current_term = self.current_term
+peer.voted_for = self.id
+votes += 1
+
+majority = (len(self.peers) + 1) // 2 + 1
+if votes >= majority:
+self.become_leader()
+else:
+self.state = self.FOLLOWER
+
+def become_leader(self):
+self.state = self.LEADER
+print(f"[{self.id}] Became LEADER for term {self.current_term} ")
+self.send_heartbeat()
+
+def send_heartbeat(self):
+print(f"[{self.id}] Sending heartbeats...")
+for peer in self.peers:
+peer.state = self.FOLLOWER
+
+# Demo
+nodes = [RaftNode(f"S{i}", []) for i in range(5)]
+for n in nodes: n.peers = [x for x in nodes if x != n]
+
+# Simulasi S0 timeout dan mulai election
+nodes[0].start_election()
+</code></pre>
+</section>
+
+<!-- 
+HANDS-ON LAB
+-->
+<section class="section-divider" data-background-color="#0a1a0a">
+<h2>Hands-On Lab</h2>
+<p>4 lab praktikum · Python · ZooKeeper · Raft · Vector Clock</p>
+<div class="three-col" style="margin-top:1em; text-align:left;">
+  <div class="card blue small">
+    <strong>Lab 1</strong><br>
+    Simulasi Lamport Clock<br>
+    <span style="color:rgba(255,255,255,.5);">Python threading</span>
+  </div>
+  <div class="card yellow small">
+    <strong>Lab 2</strong><br>
+    ZooKeeper Distributed Lock<br>
+    <span style="color:rgba(255,255,255,.5);">Docker + Kazoo</span>
+  </div>
+  <div class="card green small">
+    <strong>Lab 3 &amp; 4</strong><br>
+    Raft Visualizer + Vector Clock<br>
+    <span style="color:rgba(255,255,255,.5);">etcd + Python</span>
+  </div>
+</div>
+</section>
+
+<!-- Lab 1: Lamport Clock -->
+<section>
+<h2>Lab 1 – Simulasi Lamport Clock</h2>
+<div class="two-col" style="margin-bottom:.6em;">
+  <div class="handson">
+    <h4>Tujuan Pembelajaran</h4>
+    <ul class="small">
+      <li>Memahami cara kerja Lamport Clock pada sistem terdistribusi</li>
+      <li>Mengamati bagaimana timestamp disesuaikan saat menerima pesan</li>
+      <li>Memverifikasi properti: <code>C(send) &lt; C(recv)</code></li>
+    </ul>
+  </div>
+  <div class="card orange">
+    <h4>Yang Harus Dikerjakan</h4>
+    <ol class="steps small">
+      <li>Jalankan kode <code>lab1_lamport.py</code>, amati output</li>
+      <li>Gambar diagram event timeline P1, P2, P3 dengan timestamp-nya</li>
+      <li>Jawab 4 pertanyaan di slide berikutnya secara tertulis</li>
+      <li>Tambahkan proses P4, kirim pesan dari P3 ke P4 — catat hasilnya</li>
+    </ol>
+    <div class="note small" style="margin-top:.4em;">Kumpulkan: diagram + jawaban + kode modifikasi</div>
+  </div>
+</div>
+<pre><code class="python" data-trim data-line-numbers="1-45">
+# lab1_lamport.py
+import threading, queue, time, random
+
+class Process(threading.Thread):
+def __init__(self, pid, peers):
+super().__init__(daemon=True)
+self.pid = pid
+self.clock = 0
+self.inbox = queue.Queue()
+self.peers = peers # dict: pid -> Process
+
+def send(self, target_pid, message):
+self.clock += 1
+ts = self.clock
+print(f" [{self.pid}|t={ts}] SEND '{message}' → {target_pid}")
+self.peers[target_pid].inbox.put((ts, self.pid, message))
+
+def receive(self):
+ts, sender, msg = self.inbox.get()
+self.clock = max(self.clock, ts) + 1
+print(f" [{self.pid}|t={self.clock}] RECV '{msg}' ← {sender}")
+
+def local_event(self, name):
+self.clock += 1
+print(f" [{self.pid}|t={self.clock}] EVENT '{name}'")
+
+def run(self):
+time.sleep(random.uniform(0, 0.2))
+if self.pid == "P1":
+self.local_event("start")
+self.send("P2", "hello")
+self.receive() # will get from P2
+elif self.pid == "P2":
+self.receive() # dari P1
+self.local_event("process")
+self.send("P1", "ack")
+self.send("P3", "data")
+elif self.pid == "P3":
+self.receive() # dari P2
+self.local_event("done")
+
+processes = {}
+for pid in ["P1", "P2", "P3"]:
+processes[pid] = Process(pid, processes)
+
+print("=== Jalankan simulasi Lamport Clock ===")
+for p in processes.values(): p.start()
+for p in processes.values(): p.join(timeout=3)
+print("=== Selesai ===")
+</code></pre>
+</section>
+
+<!-- Lab 1 Expected Output -->
+<section>
+<h2>Lab 1 – Analisis Output</h2>
+<div class="two-col">
+<div>
+<h4>Contoh Output yang Diharapkan</h4>
+<pre><code class="text" style="font-size:.7em;">
+=== Jalankan simulasi Lamport Clock ===
+[P1|t=1] EVENT 'start'
+[P1|t=2] SEND 'hello' → P2
+[P2|t=3] RECV 'hello' ← P1
+[P2|t=4] EVENT 'process'
+[P2|t=5] SEND 'ack' → P1
+[P2|t=6] SEND 'data' → P3
+[P1|t=6] RECV 'ack' ← P2
+[P3|t=7] RECV 'data' ← P2
+[P3|t=8] EVENT 'done'
+=== Selesai ===
+</code></pre>
+</div>
+<div>
+<h4>Pertanyaan Wajib Dijawab (Tulis di Laporan)</h4>
+<ol class="steps small">
+  <li>Apakah <code>t(SEND)</code> selalu lebih kecil dari <code>t(RECV)</code>? Mengapa?</li>
+  <li>Apakah bisa disimpulkan P1.start terjadi sebelum P3.done? Jelaskan dengan relasi happened-before!</li>
+  <li>Jika P2 crash setelah mengirim 'ack' ke P1 tapi sebelum 'data' ke P3 — apa yang terjadi pada clock P3?</li>
+  <li>Modifikasi kode: ganti <code>LamportClock</code> dengan <code>VectorClock</code>. Tunjukkan hasilnya!</li>
+</ol>
+<div class="note small" style="margin-top:.4em;">Laporan dikumpulkan sebagai file PDF + kode Python.</div>
+</div>
+</div>
+</section>
+
+<!-- Lab 2: ZooKeeper -->
+<section>
+<h2>Lab 2 – ZooKeeper CLI Praktikum</h2>
+<div class="two-col" style="margin-bottom:.5em;">
+  <div class="handson">
+    <h4>Tujuan Pembelajaran</h4>
+    <ul class="small">
+      <li>Memahami struktur ZNode sebagai shared namespace</li>
+      <li>Mencoba mekanisme <em>watch</em> untuk notifikasi perubahan</li>
+      <li>Membuktikan sifat <em>ephemeral node</em> saat koneksi putus</li>
+    </ul>
+  </div>
+  <div class="card orange">
+    <h4>Yang Harus Dikerjakan</h4>
+    <ol class="steps small">
+      <li>Jalankan ZooKeeper via Docker, masuk ke <code>zkCli.sh</code></li>
+      <li>Buat ZNode <code>/mahasiswa/[NIM]</code>, isi dengan nama Anda</li>
+      <li>Buka 2 terminal: satu watch <code>/mahasiswa/[NIM]</code>, satu lagi ubah nilainya — screenshot notifikasi!</li>
+      <li>Buat <em>ephemeral node</em>, lalu tutup koneksi. Buktikan node hilang!</li>
+    </ol>
+    <div class="note small" style="margin-top:.4em;">Kumpulkan: screenshot tiap langkah</div>
+  </div>
+</div>
+<div class="two-col" style="margin-top:.5em;">
+<div>
+<h4>Setup (Docker)</h4>
+<pre><code class="bash" data-trim>
+# Jalankan ZooKeeper
+docker run -d --name zk \
+-p 2181:2181 \
+zookeeper:3.9
+
+# Masuk ke CLI
+docker exec -it zk ./bin/zkCli.sh
+</code></pre>
+<h4>Operasi Dasar</h4>
+<pre><code class="text" data-trim>
+# Di zkCli:
+ls /
+create /myapp "hello"
+get /myapp
+set /myapp "world"
+delete /myapp
+</code></pre>
+</div>
+<div>
+<h4>Experiment: Watcher</h4>
+<pre><code class="text" data-trim>
+# Terminal 1 – watch
+get -w /myapp
+
+# Terminal 2 – trigger change
+set /myapp "changed!"
+
+# Terminal 1 akan menerima:
+# WatchedEvent state:SyncConnected
+# type:NodeDataChanged path:/myapp
+</code></pre>
+<div class="note small">
+Perhatikan: setelah notifikasi, watcher otomatis <strong>dihapus</strong>. Harus watch ulang!
+</div>
+</div>
+</div>
+</section>
+
+<!-- Lab 2: ZooKeeper Distributed Lock -->
+<section>
+<h2>Lab 2 – ZooKeeper: Distributed Lock (Tugas Inti)</h2>
+<div class="two-col">
+<div>
+<pre><code class="python" data-trim style="font-size:.62em;">
+# lab2_zk_lock.py  (pip install kazoo)
+from kazoo.client import KazooClient
+from kazoo.recipe.lock import Lock
+import threading, time
+
+def worker(worker_id):
+    zk = KazooClient(hosts='localhost:2181')
+    zk.start()
+    lock = Lock(zk, "/myapp/lock")
+    print(f"[Worker-{worker_id}] Mencoba acquire lock...")
+    with lock:
+        print(f"[Worker-{worker_id}] Lock diperoleh! Masuk CR.")
+        time.sleep(2)
+        print(f"[Worker-{worker_id}] Selesai, release lock.")
+    zk.stop()
+
+threads = [threading.Thread(target=worker, args=(i,)) for i in range(3)]
+for t in threads: t.start()
+for t in threads: t.join()
+print("Semua worker selesai!")
+</code></pre>
+</div>
+<div>
+<h4>Tugas Mahasiswa</h4>
+<ol class="steps small">
+  <li>Jalankan kode di atas, amati urutan output — apakah hanya 1 worker di CR?</li>
+  <li>Ubah jumlah worker menjadi 5. Apakah urutan selalu sama? Mengapa?</li>
+  <li>Simulasikan worker yang <em>crash</em> di tengah critical section (tambahkan <code>raise Exception</code> di dalam <code>with lock</code>). Apa yang terjadi pada worker lain?</li>
+  <li>Ganti <code>Lock</code> dengan implementasi manual menggunakan <em>ephemeral sequential node</em>.<br><span style="color:rgba(255,255,255,.5);">Hint: gunakan pola <code>/lock/node-</code> + cek sibling terkecil</span></li>
+</ol>
+<div class="note small" style="margin-top:.4em;">Kumpulkan: kode + output + penjelasan singkat tiap tugas</div>
+</div>
+</div>
+</section>
+
+<!-- Lab 3: Raft Visualizer -->
+<section>
+<h2>Lab 3 – Observasi Raft Consensus</h2>
+<div class="two-col">
+<div>
+  <div class="handson">
+    <h4>Tujuan Pembelajaran</h4>
+    <ul class="small">
+      <li>Mengamati proses leader election secara visual</li>
+      <li>Memahami bagaimana log direplikasi ke follower</li>
+      <li>Melihat efek network partition pada konsensus</li>
+    </ul>
+    <h4 style="margin-top:.6em;">Alat: <code>raft.github.io</code></h4>
+    <ol class="steps small">
+      <li>Buka browser ke <code>https://raft.github.io/</code></li>
+      <li>Tunggu hingga leader terpilih — catat berapa lama (term berapa?)</li>
+      <li>Klik <strong>Stop</strong> pada leader → amati re-election. Screenshot!</li>
+      <li>Kirim beberapa log entry via tombol <strong>Request</strong> — amati replikasi ke follower</li>
+      <li>Aktifkan <strong>Network Partition</strong> → apa yang terjadi pada minority partition?</li>
+    </ol>
+  </div>
+</div>
+<div>
+  <h4>Pertanyaan Wajib Dijawab</h4>
+  <ol class="steps small">
+    <li>Pada saat re-election, apakah node dengan log yang lebih pendek bisa jadi leader? Mengapa?</li>
+    <li>Berapa minimum server yang harus aktif agar sistem tetap berfungsi (dari 5 server)?</li>
+    <li>Apa yang terjadi pada entry yang belum commit saat leader crash?</li>
+    <li>Bandingkan dengan ZooKeeper: siapa yang handle write saat leader down?</li>
+  </ol>
+  <div class="note small" style="margin-top:.4em;">Kumpulkan: screenshot tiap eksperimen + jawaban 4 pertanyaan</div>
+</div>
+</div>
+</section>
+
+<!-- Lab 3: etcd Python -->
+<section>
+<h2>Lab 3 – etcd sebagai Raft-based KV Store</h2>
+<div class="handson" style="margin-bottom:.5em;">
+  <h4>Tugas: Implementasi Config Watcher dengan etcd</h4>
+  <p class="small">Jalankan kode berikut, lalu kerjakan modifikasi di bawahnya.</p>
+</div>
+<pre><code class="python" data-trim>
+# lab3_etcd.py (pip install etcd3)
+import etcd3, threading, time
+
+def watch_key(etcd, key):
+"""Watch sebuah key dan print setiap perubahan."""
+print(f"Watching key: {key}")
+events_iterator, cancel = etcd.watch(key)
+for event in events_iterator:
+print(f" Event: {type(event).__name__} | "
+f"key={event.key.decode()} | "
+f"value={event.value.decode() if event.value else 'deleted'}")
+
+etcd = etcd3.client(host='localhost', port=2379)
+
+# Start watcher in background
+watcher_thread = threading.Thread(
+target=watch_key, args=(etcd, b'/config/threshold'), daemon=True
+)
+watcher_thread.start()
+
+# Simulate config updates
+time.sleep(0.5)
+for i in range(5):
+value = f"threshold={80 + i}"
+etcd.put('/config/threshold', value)
+print(f"Updated: {value}")
+time.sleep(1)
+
+# Leader election using etcd
+print("\n--- Leader Election ---")
+election = etcd3.Election(etcd, "my-service")
+election.campaign("node-1") # blocks until leader
+print("I am the leader!")
+</code></pre>
+<div class="card orange small" style="margin-top:.5em;">
+  <strong>Tugas Modifikasi:</strong>
+  (1) Tambahkan watcher untuk key <code>/config/timeout</code> secara paralel.
+  (2) Implementasikan leader election dengan 2 node berbeda — siapa yang menang jika keduanya campaign bersamaan?
+  (3) Catat output dan jelaskan mengapa hasilnya deterministik atau tidak.
+</div>
+</section>
+
+<!-- Lab 4: Vector Clock Implementation -->
+<section>
+<h2>Lab 4 – Vector Clock: Implementasi &amp; Analisis</h2>
+<div class="two-col" style="margin-bottom:.5em;">
+  <div class="handson">
+    <h4>Tujuan Pembelajaran</h4>
+    <ul class="small">
+      <li>Mengimplementasikan Vector Clock dari nol</li>
+      <li>Membuktikan keterbatasan Lamport Clock (kausalitas)</li>
+      <li>Mengidentifikasi event yang <em>concurrent</em> vs <em>causally ordered</em></li>
+    </ul>
+  </div>
+  <div class="card orange">
+    <h4>Tugas yang Harus Dikerjakan</h4>
+    <ol class="steps small">
+      <li>Jalankan kode, verifikasi output <code>a → b = True</code></li>
+      <li>Buat skenario di mana dua event <strong>concurrent</strong> (tidak ada yang precede yang lain) — tunjukkan dengan <code>concurrent()</code></li>
+      <li>Bandingkan: apakah Lamport Clock bisa mendeteksi concurrency yang sama?</li>
+      <li>Tambah proses P3 yang mengirim pesan ke P1 secara bersamaan dengan P2 — gambar diagram vector clock-nya</li>
+    </ol>
+  </div>
+</div>
+<pre><code class="python" data-trim>
+# lab4_vector_clock.py
+class VectorClock:
+def __init__(self, pid, all_pids):
+self.pid = pid
+self.clock = {p: 0 for p in all_pids}
+
+def tick(self):
+self.clock[self.pid] += 1
+return dict(self.clock)
+
+def send(self):
+self.clock[self.pid] += 1
+return dict(self.clock)
+
+def receive(self, remote_ts):
+for p in self.clock:
+self.clock[p] = max(self.clock[p], remote_ts[p])
+self.clock[self.pid] += 1 # increment setelah merge
+
+def happens_before(self, ts_a, ts_b) -> bool:
+"""Return True jika ts_a causally precedes ts_b."""
+leq = all(ts_a[p] <= ts_b[p] for p in ts_a)
+lt = any(ts_a[p] < ts_b[p] for p in ts_a)
+return leq and lt
+
+def concurrent(self, ts_a, ts_b) -> bool:
+return (not self.happens_before(ts_a, ts_b) and
+not self.happens_before(ts_b, ts_a))
+
+# Demo
+pids = ["P1", "P2", "P3"]
+vc1 = VectorClock("P1", pids)
+vc2 = VectorClock("P2", pids)
+vc3 = VectorClock("P3", pids)
+
+ts_a = vc1.send() # P1 sends
+vc2.receive(ts_a)
+ts_b = vc2.send() # P2 sends after receiving
+
+print("ts_a:", ts_a)
+print("ts_b:", ts_b)
+print("a → b?", vc1.happens_before(ts_a, ts_b)) # True
+print("b → a?", vc1.happens_before(ts_b, ts_a))   # False
+print("concurrent?", vc1.concurrent(ts_a, ts_b))    # False (a→b, bukan concurrent)
+
+# Skenario concurrent: P1 dan P3 kirim pesan secara bersamaan ke P2
+vc3 = VectorClock("P3", pids)
+ts_c = vc3.send()    # P3 kirim tanpa tahu tentang ts_a
+print("\nts_a (dari P1):", ts_a)
+print("ts_c (dari P3):", ts_c)
+print("a → c?", vc1.happens_before(ts_a, ts_c))   # False
+print("c → a?", vc1.happens_before(ts_c, ts_a))   # False
+print("a || c (concurrent)?", vc1.concurrent(ts_a, ts_c))  # True!
+</code></pre>
+<div class="note small" style="margin-top:.4em;">
+  Kumpulkan: kode lengkap + diagram vector clock + jawaban perbandingan Lamport vs Vector Clock
+</div>
+</section>
+
+<!-- 
+RINGKASAN
+-->
+<section>
+<h2> Ringkasan</h2>
+<div class="three-col small">
+<div class="card blue">
+<h4>Clock Sync</h4>
+<ul>
+<li>UTC sebagai referensi</li>
+<li>NTP: offset θ, delay δ</li>
+<li>RBS: internal sync</li>
+</ul>
+</div>
+<div class="card yellow">
+<h4>Logical Clocks</h4>
+<ul>
+<li>Happened-before → partial order</li>
+<li>Lamport: scalar counter per proses</li>
+<li>Vector: causal dependency</li>
+</ul>
+</div>
+<div class="card green">
+<h4>Mutual Exclusion</h4>
+<ul>
+<li>Centralized: sederhana, SPOF</li>
+<li>Ricart: 2(N-1) pesan</li>
+<li>Token ring: 1 token</li>
+</ul>
+</div>
+</div>
+<div class="two-col small" style="margin-top:.7em;">
+<div class="card orange">
+<h4> ZooKeeper</h4>
+<ul>
+<li>ZNode tree, watches, ephemeral</li>
+<li>Distributed lock, election</li>
+<li>ZAB protocol, quorum</li>
+</ul>
+</div>
+<div class="card" style="border-color: var(--accent3);">
+<h4> Raft</h4>
+<ul>
+<li>Leader election + term</li>
+<li>Log replication, commit</li>
+<li>Safety: log matching</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- Final Slide -->
+<section class="center-all" data-background-gradient="radial-gradient(ellipse at 70% 50%, #0d2137 0%, #0a0f1e 100%)">
+<br><br>
+<h1> Pertanyaan?</h1>
+<hr style="border-color:var(--accent); margin: 1em auto; width:30%;"/>
+<p class="small" style="color:rgba(255,255,255,.5);">
+Referensi: Tanenbaum &amp; Van Steen – Distributed Systems 4th ed.<br>
+ZooKeeper: <code>zookeeper.apache.org</code><br>
+Raft: <code>raft.github.io</code> · etcd: <code>etcd.io</code>
+</p>
+<br>
+<div class="two-col tiny" style="text-align:center; color:rgba(255,255,255,.4); max-width:500px; margin: 0 auto;">
+<div>Distributed Systems<br>2025/2026 Genap</div>
+<div>Universitas Brawijaya<br>Sistem Terdistribusi</div>
+</div>
+</section>
+
+</div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+Reveal.initialize({
+hash: true,
+slideNumber: 'c/t',
+progress: true,
+controls: true,
+transition: 'slide',
+transitionSpeed: 'fast',
+backgroundTransition: 'fade',
+width: 1280,
+height: 720,
+margin: 0.04,
+plugins: [ RevealHighlight, RevealNotes, RevealMath.KaTeX ],
+highlight: {
+highlightOnLoad: true
+}
+});
+</script>
+</body>
+</html>
