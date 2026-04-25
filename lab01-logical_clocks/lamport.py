@@ -38,10 +38,16 @@ class Process(threading.Thread):
             self.send("P3", "data")
         elif self.pid == "P3":
             self.receive() # dari P2
+            self.local_event("process")
+            self.send("P4", "this one is for you")
+            self.receive() # dari P4
+        elif self.pid == "P4":
+            self.receive() # dari P3
             self.local_event("done")
+            self.send("P3", "i got it")
 
 processes = {} # Dictionary untuk menyimpan referensi ke semua proses, dengan key sebagai pid dan value sebagai instance Process
-for pid in ["P1", "P2", "P3"]:
+for pid in ["P1", "P2", "P3", "P4"]:
     processes[pid] = Process(pid, processes)
 
 print("=== Jalankan simulasi Lamport Clock ===")
